@@ -20,5 +20,6 @@
     - jq
     - tree
     - python-yaml
+    - git
   become: yes
   become_method: sudo

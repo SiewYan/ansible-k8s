@@ -10,3 +10,19 @@
   retries: 5
   delay: 2
   ignore_errors: true
+
+- name: Clone prometheus-operator repo
+  git:
+    repo: https://github.com/coreos/prometheus-operator
+
+- name: Deploy Prometheus into cluster
+  when: init_cluster and started_kubelet
+  command: |
+    kubectl --kubeconfig={{ kubeadmin_config }} \
+        apply -f prometheus-operator/contrib/kube-prometheus/manifests
+  register: create_result
+  until: create_result.rc == 0
+  retries: 5
+  delay: 2
+  ignore_errors: true
+

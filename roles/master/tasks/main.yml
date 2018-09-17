@@ -44,6 +44,20 @@
     mode: 0755
     remote_src: True
 
+- name: Copy 11-kube-prometheus.conf to /etc/systemd/system/kubelet.service.d/
+  copy:
+    src: https://raw.githubusercontent.com/zangrand/ansible-k8s/master/hack/11-kube-prometheus.conf
+    dest: /etc/systemd/system/kubelet.service.d/11-kube-prometheus.conf
+
+- name: Reconfigure kube-controller-manager and kube-scheduler to listen on non-local addresses
+  replace:
+    path: "/etc/kubernetes/manifests/{{ item }}"
+    regexp: "--address=127.0.0.1"
+    replace: "--address=0.0.0.0"
+  with_items:
+    - "kube-controller-manager.yaml"
+    - "kube-scheduler.yaml"
+
 - name: Enable and restart kubelet engine
   systemd:
     name: kubelet
@@ -52,4 +66,5 @@
     enabled: yes
   notify:
   - "Deploy kubernetes dashboard into cluster"
+  - "Deploy Prometheus into cluster"
   register: started_kubelet
