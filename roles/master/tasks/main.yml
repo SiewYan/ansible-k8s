@@ -44,6 +44,11 @@
     mode: 0755
     remote_src: True
 
+- name: Clone prometheus-operator repo
+  git:
+    repo: https://github.com/coreos/prometheus-operator
+    dest: ./prometheus-operator
+
 - name: Enable and restart kubelet engine
   systemd:
     name: kubelet

@@ -11,10 +11,6 @@
   delay: 2
   ignore_errors: true
 
-- name: Clone prometheus-operator repo
-  git:
-    repo: https://github.com/coreos/prometheus-operator
-
 - name: Deploy Prometheus into cluster
   when: init_cluster and started_kubelet
   command: |
