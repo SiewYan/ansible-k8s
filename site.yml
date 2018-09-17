@@ -1,0 +1,30 @@
+---
+# This playbook deploys a simple kubeadm install.
+- name: Bootstrap Tasks
+  hosts: all
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+  gather_facts: False
+  roles:
+    - common
+
+- name: Install Kubernetes master
+  hosts: master
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+  roles:
+    - docker
+    - kubeadm
+    - master
+
+- name: Install nodes
+  remote_user: ubuntu
+  hosts: node
+  become: yes
+  become_method: sudo
+  roles:
+    - docker
+    - kubeadm
+    - node

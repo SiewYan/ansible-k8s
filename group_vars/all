@@ -1,0 +1,17 @@
+
+kubeadm_token: decaf2.c61dd19a426515ec
+
+master_ip: "{{ hostvars['master1']['ansible_eth0']['ipv4']['address'] }}"
+
+flannel_subnet: 10.244.0.0/16
+
+ansible_user: ubuntu
+
+kubeadm_reset_before_init: true
+
+kubeadmin_config: /etc/kubernetes/admin.conf
+
+enable_dashboard: yes
+
+enable_metrics: yes
+

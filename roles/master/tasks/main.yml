@@ -1,0 +1,55 @@
+---
+- name: Reset kubeadm before init in case this is not the first run
+  command: kubeadm reset -f
+  when: kubeadm_reset_before_init
+  register: reset_cluster
+  
+- name: kubeadm init with pre generated token
+  when: reset_cluster is succeeded
+  shell: |
+    kubeadm init --pod-network-cidr {{ flannel_subnet }} --token {{ kubeadm_token }}
+  register: init_cluster
+
+- name: allow permissive RBAC rules
+  when: init_cluster
+  command: "kubectl --kubeconfig /etc/kubernetes/admin.conf create clusterrolebinding permissive-binding \
+  --clusterrole=cluster-admin \
+  --user=admin \
+  --user=kubelet \
+  --group=system:serviceaccounts"
+
+- name: taint master node
+  when: init_cluster
+  command: kubectl --kubeconfig /etc/kubernetes/admin.conf taint nodes --all node-role.kubernetes.io/master-
+
+- name: install flannel pod network
+  when: init_cluster
+  command: kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+- name: Create Kubernetes config directory
+  become: false
+  file: path="~/.kube/" state=directory
+
+- name: Change permissions of .kube/config
+  file: path=/etc/kubernetes/admin.conf mode=0775
+
+- name: Copy admin.conf to Home directory
+  when: init_cluster and ansible_user is defined
+  become: false
+  copy:
+    src: "{{ kubeadmin_config }}"
+    dest: "~/.kube/config"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0755
+    remote_src: True
+
+- name: Enable and restart kubelet engine
+  systemd:
+    name: kubelet
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  notify:
+  - "Deploy kubernetes dashboard into cluster"
+  register: started_kubelet
