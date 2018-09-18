@@ -72,6 +72,7 @@ Add your SSH key to the ssh-agent
 
 ```
 $ eval "$(ssh-agent -s)"
+Agent pid 59566
 
 $ ssh-add ~/.ssh/id_rsa
 ```
