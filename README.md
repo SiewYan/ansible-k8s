@@ -1,9 +1,9 @@
 # Deployment of a Kubernetes cluster via ansible
 
 ## Overview
-The provided playbooks Ansible deploy Kubernetes cluster with a basic topology: one master and at least two nodes.
-The installation is based on kubeadm tool configured with a pre-generated admin token and flannel network.
-The playbooks enrich the cluster installation with a series of services such as:
+The provided playbooks Ansible deploy a Kubernetes cluster with a basic topology: one master and at least two nodes.
+The installation is based on the kubeadm tool configured with a pre-generated admin token and flannel network.
+The playbooks enrich the cluster installation with a set of services such as:
 - dashboards: legacy and Grafana
 - monitoring: Prometheus Operator
 - Big Data: Spark Operator.
