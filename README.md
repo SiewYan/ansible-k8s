@@ -1,16 +1,16 @@
 # Deployment of a Kubernetes cluster via ansible
 
 ## Overview
-The provided playbooks Ansible deploy Kubernetes cluster with a basic topology: one master and at least two nodes.
-The installation is based on kubeadm tool configured with a pre-generated admin token and flannel network.
-The playbooks enrich the cluster installation with a series of services such as:
+The provided playbooks Ansible deploy a Kubernetes cluster with a basic topology: one master and at least two nodes.
+The installation is based on the kubeadm tool configured with a pre-generated admin token and flannel network.
+The playbooks enrich the cluster installation with a set of services such as:
 - dashboards: legacy and Grafana
 - monitoring: Prometheus Operator
 - Big Data: Spark Operator.
 
 ## System requirements
 - Deployment environment must have Ansible 2.4.0+
-- Expects 3 Ubuntu nodes (test on 18.04)
+- Expects 3 Ubuntu nodes (tested on 18.04)
 - Master and nodes must have passwordless SSH access
 
 ## Get Started
@@ -25,13 +25,15 @@ The directory structure should be like
 
 ```
 ansible-k8s/
-├── README.md
 ├── group_vars
 │   └── all
 ├── inventory
 ├── k8s
+│   ├── alertmanager-service.yaml
 │   ├── grafana-service.yaml
-│   └── kubernetes-dashboard.yaml
+│   ├── kubernetes-dashboard.yaml
+│   └── prometheus-service.yaml
+├── README.md
 ├── roles
 │   ├── common
 │   │   └── tasks
@@ -70,6 +72,7 @@ Add your SSH key to the ssh-agent
 
 ```
 $ eval "$(ssh-agent -s)"
+Agent pid 59566
 
 $ ssh-add ~/.ssh/id_rsa
 ```
