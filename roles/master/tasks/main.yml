@@ -49,6 +49,26 @@
     repo: https://github.com/coreos/prometheus-operator
     dest: ./prometheus-operator
 
+- name: Set the NodePort to the Grafana service configuration
+  get_url:
+    url: https://raw.githubusercontent.com/zangrand/ansible-k8s/master/k8s/grafana-service.yaml
+    dest: prometheus-operator/contrib/kube-prometheus/manifests/
+
+- name: Set the NodePort to the Alertmanager service configuration
+  get_url:
+    url: https://raw.githubusercontent.com/zangrand/ansible-k8s/master/k8s/alertmanager-service.yaml
+    dest: prometheus-operator/contrib/kube-prometheus/manifests/
+
+- name: Set the NodePort to the Prometheus service configuration
+  get_url:
+    url: https://raw.githubusercontent.com/zangrand/ansible-k8s/master/k8s/prometheus-service.yaml
+    dest: prometheus-operator/contrib/kube-prometheus/manifests/
+
+- name: Clone spark-on-k8s-operator repo
+  git:
+    repo: https://github.com/GoogleCloudPlatform/spark-on-k8s-operator.git
+    dest: ./spark-on-k8s-operator
+
 - name: Enable and restart kubelet engine
   systemd:
     name: kubelet
@@ -56,6 +76,7 @@
     state: restarted
     enabled: yes
   notify:
-  - "Deploy kubernetes dashboard into cluster"
-  - "Deploy Prometheus into cluster"
+  - "Deploy the kubernetes dashboard"
+  - "Deploy Prometheus"
+  - "Deploy the Spark operator"
   register: started_kubelet
