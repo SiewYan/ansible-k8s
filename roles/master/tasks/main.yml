@@ -45,9 +45,12 @@
     remote_src: True
 
 - name: Clone prometheus-operator repo
+  become: no
   git:
     repo: https://github.com/coreos/prometheus-operator
     dest: ./prometheus-operator
+    update: yes
+    force: yes
 
 - name: Set the NodePort to the Grafana service configuration
   get_url:
@@ -65,9 +68,12 @@
     dest: prometheus-operator/contrib/kube-prometheus/manifests/
 
 - name: Clone spark-on-k8s-operator repo
+  become: no
   git:
     repo: https://github.com/GoogleCloudPlatform/spark-on-k8s-operator.git
     dest: ./spark-on-k8s-operator
+    update: yes
+    force: yes
 
 - name: Enable and restart kubelet engine
   systemd:
