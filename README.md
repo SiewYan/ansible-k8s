@@ -10,7 +10,7 @@ The playbooks enrich the cluster installation with a set of services such as:
 
 ## System requirements
 - Deployment environment must have Ansible 2.4.0+
-- Expects 3 Ubuntu nodes (test on 18.04)
+- Expects 3 Ubuntu nodes (tested on 18.04)
 - Master and nodes must have passwordless SSH access
 
 ## Get Started
