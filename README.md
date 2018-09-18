@@ -25,13 +25,15 @@ The directory structure should be like
 
 ```
 ansible-k8s/
-├── README.md
 ├── group_vars
 │   └── all
 ├── inventory
 ├── k8s
+│   ├── alertmanager-service.yaml
 │   ├── grafana-service.yaml
-│   └── kubernetes-dashboard.yaml
+│   ├── kubernetes-dashboard.yaml
+│   └── prometheus-service.yaml
+├── README.md
 ├── roles
 │   ├── common
 │   │   └── tasks
