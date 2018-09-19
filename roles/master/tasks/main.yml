@@ -81,8 +81,49 @@
     daemon_reload: yes
     state: restarted
     enabled: yes
-  notify:
-  - "Deploy the kubernetes dashboard"
-  - "Deploy Prometheus"
-  - "Deploy the Spark operator"
   register: started_kubelet
+
+- name: Deploy the kubernetes dashboard
+  when: init_cluster and started_kubelet and enable_dashboard
+  command: |
+    kubectl --kubeconfig={{ kubeadmin_config }} \
+        apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+  register: create_result
+  until: create_result.rc == 0
+  retries: 5
+  delay: 2
+  ignore_errors: true
+
+- name: Setup the kubernetes dashboard
+  when: init_cluster and started_kubelet and enable_dashboard
+  command: |
+    kubectl --kubeconfig={{ kubeadmin_config }} \
+        apply -f https://raw.githubusercontent.com/zangrand/ansible-k8s/master/k8s/kubernetes-setup.yaml
+  register: create_result
+  until: create_result.rc == 0
+  retries: 5
+  delay: 2
+  ignore_errors: true
+
+- name: Deploy Prometheus
+  when: init_cluster and started_kubelet
+  command: |
+    kubectl --kubeconfig={{ kubeadmin_config }} \
+        apply -f prometheus-operator/contrib/kube-prometheus/manifests
+  register: create_result
+  until: create_result.rc == 0
+  retries: 5
+  delay: 2
+  ignore_errors: true
+
+- name: Deploy the Spark operator
+  when: init_cluster and started_kubelet
+  command: |
+    kubectl --kubeconfig={{ kubeadmin_config }} \
+        apply -f spark-on-k8s-operator/manifest
+  register: create_result
+  until: create_result.rc == 0
+  retries: 5
+  delay: 2
+  ignore_errors: true
+
