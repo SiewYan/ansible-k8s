@@ -98,7 +98,7 @@
   when: init_cluster and started_kubelet and enable_dashboard
   command: |
     kubectl --kubeconfig={{ kubeadmin_config }} \
-        apply -f https://raw.githubusercontent.com/zangrand/ansible-k8s/master/k8s/kubernetes-setup.yaml
+        apply -f https://raw.githubusercontent.com/zangrand/ansible-k8s/master/k8s/dashboard-setup.yaml
   register: create_result
   until: create_result.rc == 0
   retries: 5
