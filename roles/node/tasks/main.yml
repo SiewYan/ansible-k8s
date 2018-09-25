@@ -4,7 +4,11 @@
   when: kubeadm_reset_before_init
 
 - name: kubeadm join with pre generated token
-  command: kubeadm join --token {{ kubeadm_token }} {{ hostvars['master1']['ansible_host'] }}:6443 --discovery-token-unsafe-skip-ca-verification
+  command: kubeadm join --token {{ kubeadm_token }} {{ hostvars[item]['ansible_host'] }}:6443 --discovery-token-unsafe-skip-ca-verification
+  with_items:
+     - "{{ groups['master'] }}"
+
+
 
 - name: Enable and restart kubelet engine
   systemd:
