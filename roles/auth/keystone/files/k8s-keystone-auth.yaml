@@ -50,6 +50,7 @@ metadata:
 spec:
   selector:
     app: k8s-keystone-auth
+  clusterIP: 10.111.64.132
   ports:
     - protocol: TCP
       port: 8443
