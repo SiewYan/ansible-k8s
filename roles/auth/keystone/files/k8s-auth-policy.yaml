@@ -21,7 +21,7 @@ data:
           },
           {
             "type": "project",
-            "values": ["{{ openstack_project }}"]
+            "values": ["OS_PROJECT"]
           }
         ]
       },
@@ -40,7 +40,7 @@ data:
           },
           {
             "type": "project",
-            "values": ["{{ openstack_project }}"]
+            "values": ["OS_PROJECT"]
           }
         ]
       }
