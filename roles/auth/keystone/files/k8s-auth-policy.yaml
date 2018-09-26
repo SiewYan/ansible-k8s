@@ -17,7 +17,7 @@ data:
         "match": [
           {
             "type": "role",
-            "values": ["admin", "_member_"]
+            "values": ["_member_"]
           },
           {
             "type": "project",
@@ -27,11 +27,10 @@ data:
       },
       {
         "resource": {
-            "verbs": ["bind"],
-            "resources": ["clusterroles"],
-            "resourceNames": ["admin", "edit", "view"],
+            "verbs": ["*"],
+            "resources": ["*"],
           "version": "*",
-          "namespace": "default"
+          "namespace": "*"
         },
         "match": [
           {
