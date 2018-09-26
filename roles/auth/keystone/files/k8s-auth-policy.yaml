@@ -9,7 +9,7 @@ data:
     [
       {
         "resource": {
-          "verbs": ["get", "list", "watch"],
+          "verbs": ["get", "list", "watch", "create", "update", "delete"],
           "resources": ["pods"],
           "version": "*",
           "namespace": "default"
@@ -17,11 +17,30 @@ data:
         "match": [
           {
             "type": "role",
-            "values": ["_member_"]
+            "values": ["admin", "_member_"]
           },
           {
             "type": "project",
-            "values": ["ISOLPHARM_Ag"]
+            "values": ["{{ openstack_project }}"]
+          }
+        ]
+      },
+      {
+        "resource": {
+            "verbs": ["bind"],
+            "resources": ["clusterroles"],
+            "resourceNames": ["admin", "edit", "view"],
+          "version": "*",
+          "namespace": "default"
+        },
+        "match": [
+          {
+            "type": "role",
+            "values": ["admin"]
+          },
+          {
+            "type": "project",
+            "values": ["{{ openstack_project }}"]
           }
         ]
       }
