@@ -1,0 +1,55 @@
+---
+
+- name: Copy the CloudVeneto CA cert to /etc/kubernetes/pki/
+  when: init_cluster and started_kubelet and enable_auth_keystone
+  become: yes
+  get_url:
+    url: https://raw.githubusercontent.com/zangrand/ansible-k8s/master/roles/auth/keystone/files/tls-ca-bundle.pem
+    dest: /etc/kubernetes/pki/
+
+- name: Copy the webhook to /etc/kubernetes/pki/
+  when: init_cluster and started_kubelet and enable_auth_keystone
+  become: yes
+  get_url:
+    url: https://raw.githubusercontent.com/zangrand/ansible-k8s/master/roles/auth/keystone/files/webhookconfig.yaml
+    dest: /etc/kubernetes/pki/
+
+
+- name: Create the k8s-auth-certs secret 
+  when: init_cluster and started_kubelet and enable_auth_keystone
+  become: no
+  command: |
+    kubectl --kubeconfig={{ kubeadmin_config }} \
+        create secret generic k8s-auth-certs \
+        --from-file=cert-file=/etc/kubernetes/pki/apiserver.crt \
+        --from-file=key-file=/etc/kubernetes/pki/apiserver.key \
+        -n kube-system
+  register: create_result
+  ignore_errors: false
+  
+- name: Create the keystone-auth-certs secret 
+  when: init_cluster and started_kubelet and enable_auth_keystone
+  become: yes
+  command: |
+    kubectl --kubeconfig={{ kubeadmin_config }} \
+        create secret tls keystone-auth-certs \
+        --from-file=/etc/kubernetes/pki/tls-ca-bundle.pem \
+        -n kube-system
+  register: create_result
+  ignore_errors: false
+    
+- name: Deploy the k8s-keystone-auth webhook service
+  when: init_cluster and started_kubelet and enable_auth_keystone
+  command: |
+    kubectl --kubeconfig={{ kubeadmin_config }} \
+        apply -f https://raw.githubusercontent.com/zangrand/ansible-k8s/master/roles/auth/keystone/files/k8s-keystone-auth.yaml
+  register: create_result
+  ignore_errors: true
+  
+- name: Deploy the policies 'k8s-auth-policy'
+  when: init_cluster and started_kubelet and enable_auth_keystone
+  command: |
+    kubectl --kubeconfig={{ kubeadmin_config }} \
+        apply -f https://raw.githubusercontent.com/zangrand/ansible-k8s/master/roles/auth/keystone/files/k8s-auth-policy.yaml
+  register: create_result
+  ignore_errors: true
