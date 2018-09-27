@@ -30,14 +30,20 @@ spec:
             - --keystone-url
             - https://cloud-areapd.pd.infn.it:5000/v3
             - --keystone-ca-file
-            - /etc/keystone/pki/ca-file.pem
+            - /etc/keystone/pki/tls-ca-bundle.pem
           volumeMounts:
-            - mountPath: /etc/kubernetes/pki
+            - mountPath: /etc/keystone/pki
               name: keystone-auth-certs
+              readOnly: true
+            - mountPath: /etc/kubernetes/pki
+              name: k8s-auth-certs
               readOnly: true
           ports:
             - containerPort: 8443
       volumes:
+      - name: k8s-auth-certs
+        secret:
+          secretName: k8s-auth-certs
       - name: keystone-auth-certs
         secret:
           secretName: keystone-auth-certs

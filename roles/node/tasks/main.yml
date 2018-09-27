@@ -1,13 +1,13 @@
 ---
 - name: Reset kubeadm before init in case this is not the first run
-  command: kubeadm reset -f
   when: kubeadm_reset_before_init
+  command: kubeadm reset -f
+
 
 - name: kubeadm join with pre generated token
   command: kubeadm join --token {{ kubeadm_token }} {{ hostvars[item]['ansible_host'] }}:6443 --discovery-token-unsafe-skip-ca-verification
   with_items:
      - "{{ groups['master'] }}"
-
 
 
 - name: Enable and restart kubelet engine
@@ -16,4 +16,3 @@
     daemon_reload: yes
     state: restarted
     enabled: yes
-  register: started_kubelet

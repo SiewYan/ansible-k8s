@@ -1,55 +1,95 @@
 ---
 
 - name: Copy the CloudVeneto CA cert to /etc/kubernetes/pki/
-  when: init_cluster and started_kubelet and enable_auth_keystone
+  when: init_cluster and started_kubelet
   become: yes
   get_url:
     url: https://raw.githubusercontent.com/zangrand/ansible-k8s/master/roles/auth/keystone/files/tls-ca-bundle.pem
     dest: /etc/kubernetes/pki/
 
+
 - name: Copy the webhook to /etc/kubernetes/pki/
-  when: init_cluster and started_kubelet and enable_auth_keystone
+  when: init_cluster and started_kubelet
   become: yes
   get_url:
     url: https://raw.githubusercontent.com/zangrand/ansible-k8s/master/roles/auth/keystone/files/webhookconfig.yaml
     dest: /etc/kubernetes/pki/
 
 
-- name: Create the k8s-auth-certs secret 
-  when: init_cluster and started_kubelet and enable_auth_keystone
-  become: no
+- name: Create service account for k8s-keystone-auth
+  when: init_cluster and started_kubelet
   command: |
     kubectl --kubeconfig={{ kubeadmin_config }} \
-        create secret generic k8s-auth-certs \
-        --from-file=cert-file=/etc/kubernetes/pki/apiserver.crt \
-        --from-file=key-file=/etc/kubernetes/pki/apiserver.key \
-        -n kube-system
+        create clusterrolebinding default-cluster-admin \
+            --clusterrole=cluster-admin \
+            --serviceaccount=kube-system:default
   register: create_result
-  ignore_errors: false
+  
   
 - name: Create the keystone-auth-certs secret 
-  when: init_cluster and started_kubelet and enable_auth_keystone
+  when: init_cluster and started_kubelet
   become: yes
   command: |
     kubectl --kubeconfig={{ kubeadmin_config }} \
-        create secret tls keystone-auth-certs \
-        --from-file=/etc/kubernetes/pki/tls-ca-bundle.pem \
+        create secret generic keystone-auth-certs \
+        --from-file=cert-file=/etc/kubernetes/pki/apiserver.crt \
+        --from-file=key-file=/etc/kubernetes/pki/apiserver.key \
+        --from-file=ca-file.pem=/etc/kubernetes/pki/tls-ca-bundle.pem \
         -n kube-system
   register: create_result
-  ignore_errors: false
+
+      
+- name: Get the k8s-auth-policy.yaml file
+  when: init_cluster and started_kubelet
+  become: no
+  get_url:
+    url: https://raw.githubusercontent.com/zangrand/ansible-k8s/master/roles/auth/keystone/files/k8s-auth-policy.yaml
+    dest: .
     
+
+- name: Change the OS_PROJECT var in k8s-auth-policy.yaml
+  when: init_cluster and started_kubelet
+  become: no
+  replace:
+    path: ./k8s-auth-policy.yaml
+    regexp: "OS_PROJECT"
+    replace: "{{ openstack_project }}"
+
+
+- name: Deploy the policies 'k8s-auth-policy'
+  when: init_cluster and started_kubelet
+  command: |
+    kubectl --kubeconfig={{ kubeadmin_config }} \
+        apply -f ./k8s-auth-policy.yaml
+  register: create_result
+
+
 - name: Deploy the k8s-keystone-auth webhook service
-  when: init_cluster and started_kubelet and enable_auth_keystone
+  when: init_cluster and started_kubelet
   command: |
     kubectl --kubeconfig={{ kubeadmin_config }} \
         apply -f https://raw.githubusercontent.com/zangrand/ansible-k8s/master/roles/auth/keystone/files/k8s-keystone-auth.yaml
   register: create_result
-  ignore_errors: true
+
   
-- name: Deploy the policies 'k8s-auth-policy'
-  when: init_cluster and started_kubelet and enable_auth_keystone
-  command: |
-    kubectl --kubeconfig={{ kubeadmin_config }} \
-        apply -f https://raw.githubusercontent.com/zangrand/ansible-k8s/master/roles/auth/keystone/files/k8s-auth-policy.yaml
+- name: Update /etc/kubernetes/manifests/kube-apiserver.yaml with webhook config 
+  when: init_cluster and started_kubelet
+  replace:
+    path: /etc/kubernetes/manifests/kube-apiserver.yaml
+    regexp: "Node,RBAC"
+    replace: "Node,Webhook,RBAC"
   register: create_result
-  ignore_errors: true
+  
+  
+- name: Set the webhook options in /etc/kubernetes/manifests/kube-apiserver.yaml
+  lineinfile:
+    path: /etc/kubernetes/manifests/kube-apiserver.yaml
+    insertbefore: "image:"
+    line: "{{ item }}"
+  with_items:
+    - '    - --authentication-token-webhook-config-file=/etc/kubernetes/pki/webhookconfig.yaml'
+    - '    - --authentication-token-webhook-cache-ttl=5m'
+    - '    - --authorization-webhook-config-file=/etc/kubernetes/pki/webhookconfig.yaml'
+    - '    - --authorization-webhook-cache-unauthorized-ttl=5m'
+    - '    - --authorization-webhook-cache-authorized-ttl=5m'
+
