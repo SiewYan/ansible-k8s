@@ -50,7 +50,7 @@ ansible-k8s/
 │   └── node
 │       └── tasks
 │           └── main.yml
-└── site.yml
+└── deploy_k8s.yaml
 ```
 
 Now edit the inventory file properly by specifying the IP addresses of master and nodes:
@@ -60,9 +60,9 @@ Now edit the inventory file properly by specifying the IP addresses of master an
 master1 ansible_host=10.64.41.16
 
 [node]
-10.64.41.11
-10.64.41.12
-10.64.41.15
+node1 ansible_host=110.64.41.11
+node2 ansible_host=10.64.41.12
+node3 ansible_host=10.64.41.15
 ...
 ```
 
@@ -82,7 +82,7 @@ or
 Finally execute:
 
 ```
-# ansible-playbook -i inventory site.yml
+# ansible-playbook -i inventory deploy_k8s.yaml
 ```
 
 ## Test if it worked
