@@ -14,8 +14,8 @@
       meta: "group={{ item.group }}"
     register: my_vm
     with_items:
-      - { name: 'k8sm2', flavor: 'cldareapd.4cores4GB25GB', group: 'master' }
-      - { name: 'k8sn2', flavor: 'cldareapd.4cores4GB25GB', group: 'node' }
+      - { name: 'kube_master', flavor: 'cldareapd.4cores4GB25GB', group: 'master' }
+      - { name: 'kube_node1', flavor: 'cldareapd.4cores4GB25GB', group: 'node' }
 
   - name: Add VM to inventory
     add_host:
@@ -29,7 +29,8 @@
     wait_for:
        port: 22
        host: "{{ item.server.private_v4 }}"
-       delay: 10
+       delay: 40
+       state: started
     with_items: "{{ my_vm.results }}"
     connection: local
 
