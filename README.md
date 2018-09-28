@@ -60,7 +60,7 @@ Now edit the inventory file properly by specifying the IP addresses of master an
 master1 ansible_host=10.64.41.16
 
 [node]
-node1 ansible_host=110.64.41.11
+node1 ansible_host=10.64.41.11
 node2 ansible_host=10.64.41.12
 node3 ansible_host=10.64.41.15
 ...
