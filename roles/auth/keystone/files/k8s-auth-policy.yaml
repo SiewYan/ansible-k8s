@@ -17,7 +17,7 @@ data:
         "match": [
           {
             "type": "role",
-            "values": ["_member_"]
+            "values": ["k8s_user"]
           },
           {
             "type": "project",
@@ -34,8 +34,8 @@ data:
         },
         "match": [
           {
-            "type": "role",
-            "values": ["admin"]
+            "type": "user",
+            "values": ["OS_USERNAME"]
           },
           {
             "type": "project",
