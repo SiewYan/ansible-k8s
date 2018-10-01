@@ -32,6 +32,7 @@
   command: |
     kubectl --kubeconfig={{ kubeadmin_config }} \
         create secret generic keystone-auth-certs \
+        --from-literal=os_auth_url={{ lookup('env', 'OS_AUTH_URL') }}
         --from-file=cert-file=/etc/kubernetes/pki/apiserver.crt \
         --from-file=key-file=/etc/kubernetes/pki/apiserver.key \
         --from-file=ca-file.pem=/etc/kubernetes/pki/tls-ca-bundle.pem \
