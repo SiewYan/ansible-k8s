@@ -52,8 +52,12 @@
   become: no
   replace:
     path: ./k8s-auth-policy.yaml
-    regexp: "OS_PROJECT"
-    replace: "{{ openstack_project }}"
+    regexp: "{{ item.name }}"
+    replace: "{{ item.value }}"
+  with_items:
+    - {name: "OS_PROJECT", value: "{{ lookup('env', 'OS_PROJECT_NAME') }}"}
+    - {name: "OS_USERNAME", value: "{{ lookup('env', 'OS_USERNAME') }}"}
+
 
 
 - name: Deploy the policies 'k8s-auth-policy'
