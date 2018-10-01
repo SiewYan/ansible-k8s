@@ -14,5 +14,3 @@ kubeadmin_config: /etc/kubernetes/admin.conf
 enable_dashboard: yes
 
 enable_metrics: yes
-
-openstack_project: ISOLPHARM_Ag
